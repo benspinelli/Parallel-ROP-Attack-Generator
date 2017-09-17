@@ -1,0 +1,81 @@
+<html>
+	<head>
+		<title>PROPAGANDA</title>
+        <link rel="stylesheet" type="text/css" href="finalproject.css">
+        <meta name="robots" content="noindex">
+	</head>
+
+	<body>
+    <div id="content">
+      <center><div class="title">PROPAGANDA (proposal)</div></center>
+      <center><div class="subtitle">Parallel ROP Attack Generator and Non-Direct Assembler</div></center>
+      <center><div class="sect_content">Ben Spinelli (bmspinel) and Chris Lee (christi3)</div></center>
+   
+      <br /> 
+      <center><a href="finalproject.html">Writeup</a></center>
+      <br />
+      
+      <div class="sect">
+      <div class="sect_title">SUMMARY</div>
+      <div class="sect_content">We will implement a solver for Attack Lab Phases 4 and 5. More generally, it is a tool for finding ROP attacks against a target binary that are equivalent to some user-specified goal. The algorithm is heavily inspired by ideas from proof search, progress graphs from 213, and continuations from 150. We want to make it fast and highly parallel on CPUs. Ideally, it will perform well on Latedays' high core count CPUs (or on the Phis if the input is large enough to generate large amounts of parallelism).</div>
+      </div><!--sect-->
+
+      <div class="sect">
+      <div class="sect_title">BACKGROUND</div>
+      <div class="sect_content">Because our problem will be very similar to proof search algorithms, there are an exponential possible routes that can be taken to reach that proof or solution. We have a certain number of gadgets to look at. Theoretically, any permutation of any subset of them may execute the effect we desire. We choose a top-down approach to hopefully reach the solution without computing unrealistic possibilities. Unlike regular proof search, however, where branches are independent calculations, we have order and coherence constraints to worry about, as described in Schwartz, Avgerinos, and Brumley's paper. Parallelizing this portion and making sure that everything turns out correct will be key to our project.<br />
+        <br />
+        To find the gadgets that we want, we will do a top-down decomposition and break the original target into smaller pieces that we can combine to find specific targets. An example of our thought process can be seen below.<br />
+        <br />
+      <center><marquee scrollamount=1 scrolldelay=5000 width=452 behavior=alternate><center><img width="450px" src="images/diagram.png" /></center></marquee></center><br />
+      <br />
+      Notice that if one branch of the tree cannot find a solution for a certain register, that register will not work for the other branch either. Therefore, we will need to find a way to update different branches with possible registers. The number of branches becomes exponentially large though, so we will be able to greatly parallelize the search for non-trivial goals. But at the same time, we will need to be able to communicate between branches about what registers are no longer possible to use. In this sense, some branches could be completely cut off if no more registers are possible.<br />
+      <br />
+      There could be huge imbalance between branches, depending on if a neighboring branch invalidates it or if it finds what it's looking for quickly. We will need to somehow allocate the work so that we can minimize idle time in the CPU. We will probably have some sort of work queue to dynamically distribute and buffer work across available CPU resources. A significant part of the project may be playing around with different scheduling strategies, to reduce the overhead of sharing/dependencies among nearby nodes within the search tree.</div>
+      </div><!--sect-->
+
+      <div class="sect">
+      <div class="sect_title">THE CHALLENGE</div>
+      <div class="sect_content">Our project is very similar to proof search, and in our program, we are going to do a top-down deconstruction until we reach gadgets that we have. In doing the top-down deconstruction, we create a tree whose branches are significantly dependent on each other. We will have to find a way to parallelize this without messing up the dependence while still keeping track of the entire tree that we have built.</div>
+      </div><!--sect-->
+
+      <div class="sect">
+      <div class="sect_title">RESOURCES</div>
+      <div class="sect_content">We are going to code the core algorithm from scratch and use C++. For disassembly, we may use the <a href="http://www.capstone-engine.org">Capstone</a> library, which is popular among ROP projects. For now, we have 20-30 different copies of Attack Lab (because Ben was a TA, what a nerd), which might be enough. We hope to use Latedays' high core count CPUs and potentially the Phis to execute our problem.<br />
+      <br />
+        There is some existing literature related to this project. Most relevant is <a href="https://users.ece.cmu.edu/~ejschwar/papers/usenix11.pdf">this paper</a> by CMU's own Schwartz, Avgerinos, and Brumley. It provides a good overview of approaches towards and concerns to-be-had in writing a correct implementation of a ROP solver. However, they do not consider parallelizing their implementation (except for one part that is embarrassingly parallel, which they assign to multiple threads). Their approach is a bit more high-level and general than ours, which allows it to find more attacks, but at the expense of runtime. They report a runtime of 1-10 minutes in a typical case. We believe we can still find a meaningful number of attacks and do so more quickly with our algorithm.<br />
+      <br />
+        There are also some existing projects that attempt similar goals, or a subset of similar goals. Interestingly, many of these are written in Python, and unsurprisingly, none are parallel. The most relevant projects we found were <a href="https://github.com/SQLab/ropchain">this one</a> by the National Chiao Tung University Software Quality Lab in Taiwan, and <a href="https://github.com/JonathanSalwan/ROPgadget/tree/master">this one</a> by a French computer scientist. Our approach is significantly different from theirs, but they may provide useful as a performance benchmark if there is an overlap between our functionality and theirs.</div>
+      </div><!--sect-->
+
+      <div class="sect">
+      <div class="sect_title">GOALS AND DELIVERABLES</div>
+      <div class="sect_content">We want to make a program whose input will be a file of assembly that the user hopes to achieve and the binary file to get it from. The output is a string that can be inputted into the program described by the binary file to take advantage of a buffer overflow and create that effect. (side note: we need to iron this out)<br />
+      <br />
+      PLAN TO ACHIEVE: We plan to be able to solve Attack Lab Phases 4 and 5. We plan to do it faster than the average person who finished Attack Lab can do it.<br />
+      <br />
+      HOPE TO ACHIEVE: We hope to expand it to more operands to allow more general attacks (bringing its functional closer to existing research).<br />
+      <br />
+      For the competition, we plan to take one of our Attack Lab targets and stick it into our program and have it output a correct string that will solve Phases 4 and 5 of that specific Attack Lab. If possible, we would also like to show a more general attack, such as calling execve, on a target.</div>
+      </div><!--sect-->
+
+      <div class="sect">
+      <div class="sect_title">PLATFORM CHOICE</div>
+      <div class="sect_content">For this specific problem, GPUs are bad because we need to maintain coherence between different branches of our tree. But we still get to parallelize with a high core count. As for mobile phones, they're just not powerful enough, and why would you need a ROP attack in your pocket?</div>
+      </div><!--sect-->
+
+      <div class="sect">
+      <div class="sect_title">SCHEDULE</div>
+      <div class="sect_content">We honestly don't know how long it'll take, but here's a general idea of our timeline that might be super off target.<br />
+      <br />
+      by Week 1: Make decisions on how to represent the state of our tree. Pick the right coding function for the search "continuations".<br />
+      by Week 3: Implement a correct sequential version.<br />
+      by Week 4: Parallelize the solution.<br />
+      for rest of time: analyze our speedup with different scheduling techniques, making cool demo+slides and cool website</div>
+      </div><!--sect-->
+
+
+    </div>
+	</body>
+	<script>
+	</script>
+</html>

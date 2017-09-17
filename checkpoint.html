@@ -1,0 +1,89 @@
+<html>
+	<head>
+		<title>PROPAGANDA</title>
+        <link rel="stylesheet" type="text/css" href="finalproject.css">
+        <meta name="robots" content="noindex">
+	</head>
+
+	<body>
+    <div id="content">
+      <center><div class="title">PROPAGANDA (checkpoint)</div></center>
+      <center><div class="subtitle">Parallel ROP Attack Generator and Non-Direct Assembler</div></center>
+      <center><div class="sect_content">Ben Spinelli (bmspinel) and Chris Lee (christi3)</div></center>
+      <br />
+      <center><a href="finalproject.html">Writeup</a> <a href="proposal.html">Proposal</a></center>
+      <br />
+
+      <div class="sect">
+      <div class="sect_title">PROGRESS</div>
+      <div class="sect_content">We have finalized many of the data structures that we will use for our project as we said we would in our schedule. Currently, we are working on building a correct implementation while keeping in mind that we will be parallelizing in the future. In a sense, we are merging the serialization and parallelization process, but since we are solving a new problem, the serial version is taking a while. <br />
+        <br />
+        Completed design decisions (not sure if we'll need to change them in the future though):
+        <ul>
+          <li>The inputs and outputs of the program</li>
+          <li>How the individual gadgets will be represented</li>
+          <li>What the tree structure will look like</li>
+          <li>How we are representing different registers and "possible registers" (a value may need to be placed into a register, but it could be any register, so we are representing that)</li>
+        </ul></div>
+        Completed code/steps:
+        <ul>
+          <li>Installed capstone onto the GHC machines and Latedays so that we can disassemble the binary</li>
+          <li>Most of the design decisions</li>
+          <li>Read in a file of inference rules and storing that information (i.e. how certain assembly commands can be decomposed into other assembly commands, or gadgets)</li>
+          <li>Parts of the solver (how to traverse and create the tree)</li>
+        </ul>
+      </div><!--sect-->
+
+      <div class="sect">
+      <div class="sect_title">CHALLENGES/THINGS THAT NEED TO BE DONE</div>
+      <div class="sect_content">Building the correct implementation has proven to be rather challenging thus far. There are many things to keep track of within the inference rules themselves and different sections of the assembly may be unable to use certain registers if a previous gadget has claimed it. <br />
+        <br />
+        For example, if we want to perform MOV %rax, %rdi, we can decompose this command into MOV %rci, %rdi and MOV %rax, %rci (or any other register other than %rci). However, we also need to make sure that the registers are unique (that we're not doing something like MOV %rdi, %rdi which can cause an infinite loop). Furthermore, in the future, we do not want certain things to happen, like MOV %rdi, %rax. Since we can just move between the same source and destination over and over again as well in this case. <br />
+        <br />
+        We've implemented parts of the tree and the continuation aspect of our program; however, keeping track of everything is proving to be difficult. Especially because this aspect is core to our program and the work of doing this search has exponential work, we do not want to end up creating more work for ourselves by creating a terrible implementation.<br />
+        <br />
+        Every branch of the the tree will have access to every single variable (intermediate register), so deciding how the locking system is going to work for the variables will be important.</div>
+      </div><!--sect-->
+    
+      <div class="sect">
+      <div class="sect_title">DELIVERABLES</div>
+      <div class="sect_content">
+        We still plan to have a program that will correctly output text that will achieve the desired assembly (input) for a given target for Attack Lab. We probably will not be able to generalize too much, but getting the correct implementation is difficult enough.<br />
+        <br />
+        Our demo will involve showing our program create the correct text file. We currently do not have any preliminary results.
+      </div>
+
+      <div class="sect">
+      <div class="sect_title">SCHEDULE</div>
+      <div class="sect_content">
+        <table style="width:100%;" border="1">
+           <tr>
+             <td>Sunday, April 24</td> 
+             <td>Complete pattern matching (going from a gadget to decomposition from our inference rules) - Ben <br />
+                 Implementing representation of forbidden moves for inference rules - Chris</td>
+           </tr>
+           <tr>
+             <td>Thursday, April 28</td> 
+             <td>Add in restrictions, special cases, and constants that we left out of the main algorithm - both</td>
+           </tr>
+           <tr>
+             <td>Sunday, May 1</td>
+             <td>Implement intereleaving the gadgets and creating the output text - Ben<br />
+                 Implement synchronization for parallelism in our program - Chris</td>
+           </tr>
+           <tr>
+             <td>Thursday, May 5</td>
+             <td>Benchmark our program - Ben</td>
+           </tr>
+           <tr>
+             <td>Sunday, May 8</td>
+             <td>Create our website - Chris</td>
+           </tr>
+         </table>
+      </div><!--sect-->
+
+    </div>
+	</body>
+	<script>
+	</script>
+</html>
